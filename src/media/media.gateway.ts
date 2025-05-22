@@ -10,7 +10,11 @@ import {
 import { Server, Socket } from 'ws';
 import { MediaService } from './media.service';
 
-@WebSocketGateway({ cors: { origin: '*' }, transports: ['websocket'] })
+@WebSocketGateway({
+  path: '/ws',
+  cors: { origin: '*' },
+  transports: ['websocket'],
+})
 export class MediaGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -20,16 +24,19 @@ export class MediaGateway
   constructor(private readonly mediaService: MediaService) {}
 
   afterInit(server: Server) {
-    console.log('WebSocket server initialized');
+    console.log('WebSocket server initialized at /ws');
   }
 
   handleConnection(client: Socket) {
-    console.log('Client connected:', client._socket.remoteAddress);
+    console.log('Client connected:', client._socket.remoteAddress || 'unknown');
     client.send(JSON.stringify({ message: 'Connected to mediasoup server' }));
   }
 
   handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client._socket.remoteAddress);
+    console.log(
+      'Client disconnected:',
+      client._socket.remoteAddress || 'unknown'
+    );
   }
 
   @SubscribeMessage('message')
