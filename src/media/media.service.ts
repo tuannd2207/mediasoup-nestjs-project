@@ -1,3 +1,4 @@
+// src/media/media.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as mediasoup from 'mediasoup';
 
@@ -5,6 +6,7 @@ import * as mediasoup from 'mediasoup';
 export class MediaService implements OnModuleInit {
   private worker: mediasoup.types.Worker;
   private router: mediasoup.types.Router;
+  private transports: Map<string, mediasoup.types.WebRtcTransport> = new Map(); // Lưu trữ transports
 
   async onModuleInit() {
     this.worker = await mediasoup.createWorker({
@@ -42,5 +44,25 @@ export class MediaService implements OnModuleInit {
 
   getRouter() {
     return this.router;
+  }
+
+  async createTransport() {
+    const transport = await this.router.createWebRtcTransport({
+      listenIps: [
+        {
+          ip: '0.0.0.0',
+          announcedIp: process.env.RAILWAY_PUBLIC_IP || '127.0.0.1',
+        },
+      ],
+      enableUdp: true,
+      enableTcp: true,
+      preferUdp: true,
+    });
+    this.transports.set(transport.id, transport); // Lưu transport
+    return transport;
+  }
+
+  getTransport(id: string) {
+    return this.transports.get(id);
   }
 }
