@@ -190,10 +190,12 @@ export class MediaGateway
             return null;
           })
         );
+        const validConsumers = consumers.filter((c) => c !== null);
+        console.log(`Sending ${validConsumers.length} consumers to client`);
         client.send(
           JSON.stringify({
             type: 'consumersCreated',
-            data: consumers.filter((c) => c !== null),
+            data: validConsumers,
           })
         );
         break;
